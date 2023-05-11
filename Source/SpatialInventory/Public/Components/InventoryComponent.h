@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ProjectTypes.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
+
+class UItemObject;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SPATIALINVENTORY_API UInventoryComponent : public UActorComponent
@@ -16,7 +19,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	FTile Tile;
 
+	TArray<UItemObject*> Inventory;
+	
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -25,5 +32,31 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (ExposeOnSpawn = true), Category = "Inventory Size")
 	int Rows = 1;
+
+protected:
+	void InitInventory();
+
+public:
+	bool TryAddItem(UItemObject* ItemToAdd);
+	bool IsRoomAvailable(UItemObject* ItemObject, int TopLeftIndex);
+	UItemObject* GetItemAtIndex(int Index);
+	void AddItemAt(UItemObject* ItemObject, int TopLeftIndex);
+
+private:
+	// Convert an index of inventory array to inventory tile
+	static FTile IndexToTile(FTile& tile, int32 index, int32 size)
+	{
+		tile.X = index % size;
+		tile.Y = index / size;
+		return tile;
+	}
+	// Convert tile of inventory to the index
+	static int TileToIndex(int32 index_x, int32 index_y, int32 size)
+	{
+		return index_x + index_y * size;
+	}
+
+public:
+	void DebugInventory();
 	
 };
