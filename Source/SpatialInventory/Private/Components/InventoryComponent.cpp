@@ -1,13 +1,21 @@
 // Spatial Inventory С++ template by matvig.
 
 #include "Components/InventoryComponent.h"
-
 #include "Base/ItemObject.h"
+#include "Widgets/InventoryItemWidget.h"
 
 UInventoryComponent::UInventoryComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	static ConstructorHelpers::FClassFinder<UUserWidget> WB_InventoryWidget(TEXT("/Game/Widgets/WB_Inventory"));
+	InventoryWidget = WB_InventoryWidget.Class;
 
+	static ConstructorHelpers::FClassFinder<UUserWidget> WB_InventoryGridWidget(TEXT("/Game/Widgets/WB_InventoryGrid"));
+	InventoryGridWidget = WB_InventoryGridWidget.Class;
+	
+	static ConstructorHelpers::FClassFinder<UUserWidget> WB_InventoryItemWidget(TEXT("/Game/Widgets/WB_InventoryItem"));
+	InventoryItemWidget = WB_InventoryItemWidget.Class;
+	
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UInventoryComponent::BeginPlay()
@@ -20,7 +28,7 @@ void UInventoryComponent::BeginPlay()
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 }
 
 void UInventoryComponent::InitInventory()
@@ -40,6 +48,7 @@ bool UInventoryComponent::TryAddItem(UItemObject* ItemToAdd)
 		if (IsRoomAvailable(ItemToAdd, i))
 		{
 			AddItemAt(ItemToAdd, i);
+			OnInventoryChanged.Broadcast();
 			return true;
 		}
 	}
@@ -100,6 +109,29 @@ void UInventoryComponent::AddItemAt(UItemObject* ItemObject, int TopLeftIndex)
 	}
 }
 
+TMap<UItemObject*, FTile> UInventoryComponent::GetAllItems()
+{
+	TMap<UItemObject*, FTile> AllItems;
+	
+	for (int i = 0; i < Inventory.Num(); i++)
+	{
+		auto CurrentItemObject = Inventory[i];
+		if (IsValid(CurrentItemObject))
+		{
+			if (!AllItems.Contains(Inventory[i]))
+			{
+				AllItems.Add(Inventory[i], IndexToTile(Tile, i, Columns));
+			}
+		}
+	}
+	return AllItems;
+}
+
+void UInventoryComponent::RemoveItem(UItemObject* ItemObject)
+{
+	
+}
+
 void UInventoryComponent::DebugInventory()
 {
 	for (int i = 0; i < Inventory.Num(); ++i)
@@ -112,5 +144,5 @@ void UInventoryComponent::DebugInventory()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%d, %s"), i, *Inventory[i]->GetFullName());
 		}
-	}
+	} 
 }
