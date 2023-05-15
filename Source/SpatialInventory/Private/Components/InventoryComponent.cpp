@@ -2,6 +2,7 @@
 
 #include "Components/InventoryComponent.h"
 #include "Base/ItemObject.h"
+#include "Slate/SlateBrushAsset.h"
 #include "Widgets/InventoryItemWidget.h"
 
 UInventoryComponent::UInventoryComponent()
@@ -14,6 +15,9 @@ UInventoryComponent::UInventoryComponent()
 	
 	static ConstructorHelpers::FClassFinder<UUserWidget> WB_InventoryItemWidget(TEXT("/Game/Widgets/WB_InventoryItem"));
 	InventoryItemWidget = WB_InventoryItemWidget.Class;
+
+	static ConstructorHelpers::FObjectFinder<USlateBrushAsset> SB_Color(TEXT("/Game/Widgets/SB_Color"));
+	SlateBrushColor = SB_Color.Object;
 	
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -41,7 +45,6 @@ void UInventoryComponent::InitInventory()
 	{
 		ItemWidget->OnRemoved.AddDynamic(this, &UInventoryComponent::RemoveItem);
 	}
-	DebugInventory();
 }
 
 bool UInventoryComponent::TryAddItem(UItemObject* ItemToAdd)
@@ -134,7 +137,7 @@ TMap<UItemObject*, FTile> UInventoryComponent::GetAllItems()
 
 void UInventoryComponent::RemoveItem(UItemObject* ItemObject)
 {
-	if (IsValid(ItemObject))
+	if (ItemObject)
 	{
 		for (int i = 0; i < Inventory.Num(); i++)
 		{

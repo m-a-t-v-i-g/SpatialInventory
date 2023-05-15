@@ -10,6 +10,7 @@
 class UInventoryWidget;
 class UInventoryGridWidget;
 class UInventoryItemWidget;
+class USlateBrushAsset;
 class UItemObject;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryChanged);
@@ -25,10 +26,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	
-	FTile Tile;
-
-	TArray<UItemObject*> Inventory;
-	
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -39,7 +36,11 @@ public:
 	int Rows = 1;
 
 protected:
-	void InitInventory();
+	UPROPERTY(VisibleDefaultsOnly, Category = "Inventory")
+	FTile Tile;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Inventory")
+	TArray<UItemObject*> Inventory;
 
 public:
 	UPROPERTY(VisibleDefaultsOnly)
@@ -50,35 +51,42 @@ public:
 	
 	UPROPERTY(VisibleDefaultsOnly)
 	TSubclassOf<UInventoryItemWidget> InventoryItemWidget;
-	
-	UPROPERTY(BlueprintAssignable)
+
+	UPROPERTY(VisibleDefaultsOnly)
+	TObjectPtr<USlateBrushAsset> SlateBrushColor;
+
+protected:
+	// Called only on begin play
+	void InitInventory();
+
+public:
 	FOnInventoryChanged OnInventoryChanged;
-	
+
+	// For add item to inventory
 	bool TryAddItem(UItemObject* ItemToAdd);
 	bool IsRoomAvailable(UItemObject* ItemObject, int TopLeftIndex);
 	UItemObject* GetItemAtIndex(int Index);
 	void AddItemAt(UItemObject* ItemObject, int TopLeftIndex);
-	
-	UFUNCTION(BlueprintCallable, Category = Inventory)
+
+	// Get items at inventory by tile
 	TMap<UItemObject*, FTile> GetAllItems();
 
-	UFUNCTION(BlueprintCallable, Category = Inventory)
+	// Remove item from inventory
+	UFUNCTION()
 	void RemoveItem(UItemObject* ItemObject);
-
-	// Convert an index of inventory array to inventory tile
+	
 	static FTile IndexToTile(FTile& tile, int32 index, int32 size)
 	{
 		tile.X = index % size;
 		tile.Y = index / size;
 		return tile;
 	}
-	// Convert tile of inventory to the index
+	
 	static int TileToIndex(int32 index_x, int32 index_y, int32 size)
 	{
 		return index_x + index_y * size;
 	}
-
-	UFUNCTION(BlueprintCallable)
-	void DebugInventory();
 	
+	// Debugging
+	void DebugInventory();
 };
