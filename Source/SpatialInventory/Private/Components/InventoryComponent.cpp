@@ -35,7 +35,12 @@ void UInventoryComponent::InitInventory()
 {
 	int InventorySize = Columns * Rows;
 	Inventory.SetNum(InventorySize);
-	
+
+	auto ItemWidget = Cast<UInventoryItemWidget>(InventoryItemWidget);
+	if (ItemWidget)
+	{
+		ItemWidget->OnRemoved.AddDynamic(this, &UInventoryComponent::RemoveItem);
+	}
 	DebugInventory();
 }
 
@@ -48,7 +53,6 @@ bool UInventoryComponent::TryAddItem(UItemObject* ItemToAdd)
 		if (IsRoomAvailable(ItemToAdd, i))
 		{
 			AddItemAt(ItemToAdd, i);
-			OnInventoryChanged.Broadcast();
 			return true;
 		}
 	}
@@ -105,6 +109,7 @@ void UInventoryComponent::AddItemAt(UItemObject* ItemObject, int TopLeftIndex)
 		for (int y = IndexToTileY; y <= TileDimensionAmountY; ++y)
 		{
 			Inventory[TileToIndex(x, y, Columns)] = ItemObject;
+			OnInventoryChanged.Broadcast();
 		}
 	}
 }
@@ -129,7 +134,17 @@ TMap<UItemObject*, FTile> UInventoryComponent::GetAllItems()
 
 void UInventoryComponent::RemoveItem(UItemObject* ItemObject)
 {
-	
+	if (IsValid(ItemObject))
+	{
+		for (int i = 0; i < Inventory.Num(); i++)
+		{
+			if (Inventory[i] == ItemObject)
+			{
+				Inventory[i] = nullptr;
+				OnInventoryChanged.Broadcast();
+			}
+		}
+	}
 }
 
 void UInventoryComponent::DebugInventory()

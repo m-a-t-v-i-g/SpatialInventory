@@ -64,8 +64,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Inventory)
 	void RemoveItem(UItemObject* ItemObject);
-	
-private:
+
 	// Convert an index of inventory array to inventory tile
 	static FTile IndexToTile(FTile& tile, int32 index, int32 size)
 	{
@@ -79,7 +78,7 @@ private:
 		return index_x + index_y * size;
 	}
 
-public:
+	UFUNCTION(BlueprintCallable)
 	void DebugInventory();
 	
 };
