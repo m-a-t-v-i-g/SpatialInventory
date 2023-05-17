@@ -1,7 +1,7 @@
 // Spatial Inventory С++ template by matvig.
 
 #include "Components/InventoryComponent.h"
-#include "Base/ItemObject.h"
+#include "Game/Item/ItemObject.h"
 #include "Slate/SlateBrushAsset.h"
 #include "Widgets/InventoryItemWidget.h"
 
