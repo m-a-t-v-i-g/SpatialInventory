@@ -75,4 +75,5 @@ DerivedDataCache/*
 
 # Rider
 .idea/
+Platforms/*
 Plugins/Developer/*
